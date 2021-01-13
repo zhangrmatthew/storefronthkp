@@ -9,7 +9,7 @@ router.post('/login', function(req, res){
   userModel.exists({ username: req.body.username, password: req.body.password},
     function(err, result){
       if(err){
-        res.send("ErrorType: Account Validation");
+        res.send(JSON.stringify({ErrorType: "Account Validation"}));
       }
       else{
         if (result){
@@ -17,7 +17,7 @@ router.post('/login', function(req, res){
           res.send(JSON.stringify({token}));
         }
         else{
-          res.send('ErrorType: Account Does Not Exist');
+          res.send(JSON.stringify({ErrorType: 'Account Does Not Exist'}));
         }
       }
     });
@@ -29,11 +29,11 @@ router.post('/create', function(req,res){
   userModel.exists({ username: req.body.username},
     function(err, result){
       if(err){
-        res.send(JSON.stringify({"ErrorType: Username Validation"});
+        res.send(JSON.stringify({ErrorType: "Username Validation"}));
       }
       else{
         if (result){
-          res.send(JSON.stringify({'ErrorType: Duplicate Username'});
+          res.send(JSON.stringify({ErrorType: 'Duplicate Username'}));
         }
         else{
           try{
@@ -42,7 +42,7 @@ router.post('/create', function(req,res){
             res.send(JSON.stringify({token}));
           }
           catch(err){
-            res.send(JSON.stringify({"ErrorType: Creation"});
+            res.send(JSON.stringify({ErrorType: "Creation"}));
           }
         }
       }
