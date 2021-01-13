@@ -19,7 +19,8 @@ server.use('/items', itemsRouter);
 mongoose.connect(process.env.DB_CONNECTION,
   () => console.log('connected to DB'));
 
-server.listen(3000);
+const PORT = process.env.PORT || 3000;
+server.listen(PORT);
 
 
 
