@@ -29,11 +29,11 @@ router.post('/create', function(req,res){
   userModel.exists({ username: req.body.username},
     function(err, result){
       if(err){
-        res.send("ErrorType: Username Validation");
+        res.send(JSON.stringify({"ErrorType: Username Validation"});
       }
       else{
         if (result){
-          res.send('ErrorType: Duplicate Username');
+          res.send(JSON.stringify({'ErrorType: Duplicate Username'});
         }
         else{
           try{
@@ -42,7 +42,7 @@ router.post('/create', function(req,res){
             res.send(JSON.stringify({token}));
           }
           catch(err){
-            res.send("ErrorType: Creation");
+            res.send(JSON.stringify({"ErrorType: Creation"});
           }
         }
       }

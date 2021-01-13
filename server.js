@@ -21,10 +21,3 @@ mongoose.connect(process.env.DB_CONNECTION,
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT);
-
-
-
-/*
-git ignore, node modules .env
-
-*/
