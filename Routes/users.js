@@ -14,7 +14,7 @@ router.post('/login', function(req, res){
       else{
         if (result){
           const token = generateAccessToken({username : req.body.username});
-          res.send(JSON.stringify({token}));
+          res.send(JSON.stringify({Message: 'Login Success', token}));
         }
         else{
           res.send(JSON.stringify({ErrorType: 'Account Does Not Exist'}));
@@ -39,7 +39,7 @@ router.post('/create', function(req,res){
           try{
             user.save();
             const token = generateAccessToken({username : req.body.username});
-            res.send(JSON.stringify({token}));
+            res.send(JSON.stringify({Message: 'Account Creation Success', token}));
           }
           catch(err){
             res.send(JSON.stringify({ErrorType: "Creation"}));
