@@ -13,7 +13,8 @@ router.post('/login', function(req, res){
       }
       else{
         if (result){
-          const token = generateAccessToken({username : req.body.username});
+          const token = generateAccessToken({username : req.body.username,
+          isAdmin: req.body.isAdmin});
           res.send(JSON.stringify({Message: 'Login Success', token}));
         }
         else{
@@ -38,7 +39,8 @@ router.post('/create', function(req,res){
         else{
           try{
             user.save();
-            const token = generateAccessToken({username : req.body.username});
+            const token = generateAccessToken({username : req.body.username,
+            isAdmin: req.body.isAdmin});
             res.send(JSON.stringify({Message: 'Account Creation Success', token}));
           }
           catch(err){

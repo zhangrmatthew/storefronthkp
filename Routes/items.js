@@ -4,7 +4,6 @@ const router = express.Router();
 const itemModel = require('../Models/itemsSchema');
 require('dotenv/config');
 
-
 router.put('/create', authenticateToken, function(req, res){
   const newItem = new itemModel({username: req.user.username, name: req.body.name
     , quantity: req.body.quantity});
@@ -28,7 +27,7 @@ router.put('/create', authenticateToken, function(req, res){
         else{
           try{
             newItem.save(function (err, item){
-              res.send(item);
+              res.send(JSON.stringify({item}));
             });
           }
           catch(err){
@@ -100,4 +99,16 @@ function authenticateTokenURL(req, res, next) {
   })
 }
 
+function authenticateTokenAdmin(req, res, next) {
+  const token = req.body.token;
+  console.log(token);
+  if (token == null) return res.sendStatus(401)
+  jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
+    console.log(err);
+    if (err) return res.sendStatus(403);
+    req.user = decoded;
+    if (!req.user.isAdmin) return res.send(403);
+    next();
+  })
+}
 module.exports = router;
