@@ -52,7 +52,7 @@ router.put('/upload', authenticateTokenAdmin, upload.array('photos', 10), functi
   });
 });
 
-router.get('/get/category', authenticateTokenAdmin, function(req, res){
+router.get('/get/category', authenticateToken, function(req, res){
   var itemsInCategory = [];
   itemModel.exists({ category: req.body.category},
     function(err, result){
@@ -88,7 +88,7 @@ router.get('/get/category', authenticateTokenAdmin, function(req, res){
 
 
 
-router.get('/get/all', authenticateTokenAdmin, function(req, res){
+router.get('/get/all', authenticateToken, function(req, res){
   var allItems = [];
   itemModel.exists({},
     function(err, result){
@@ -155,7 +155,17 @@ router.delete('/remove', authenticateTokenAdmin, function(req,res){
   });
 });
 
-
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+  if (token == null) return res.sendStatus(401)
+  jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
+    console.log(err);
+    if (err) return res.sendStatus(403);
+    req.user = decoded;
+    next();
+  })
+}
 
 function authenticateTokenAdmin(req, res, next) {
   const authHeader = req.headers['authorization']
