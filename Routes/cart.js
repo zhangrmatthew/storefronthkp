@@ -77,7 +77,7 @@ router.put('/addItem', authenticateToken, function(req, res){
             }
             else{
               const newCart = new cartModel({username: req.user.username, cart:
-                [{item: item._id , price: item.price , quantity: req.body.quantity}]});
+                [{item: item._id , price: item.price , quantity: Math.max(0, req.body.quantity)}]});
                 console.log(newCart);
                 try{
                   newCart.save(function (err, newCart){
