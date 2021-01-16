@@ -263,7 +263,7 @@ Errors:
 ```
 
 ### Fetching All Items From Cart
-Note: the cart is only instantiated when an user adds a item to the cart. If all items are removed the cart will still exist. But the cart will not exist prior to any action by the user in interacting with the cart. 
+Note: the cart is only instantiated when an user adds a item to the cart. If all items are removed the cart will still exist. But the cart will not exist prior to any action from the user interacting with the cart. 
 
 ```
 GET /cart/view
