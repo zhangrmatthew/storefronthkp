@@ -270,7 +270,6 @@ GET /cart/view
 Expected Input
 ```
 JWT Token in authorization header (Bearer Token)
-
 ```
 Expected Output
 ```
@@ -298,7 +297,6 @@ GET /cart/checkout
 Expected Input
 ```
 JWT Token in authorization header (Bearer Token)
-
 ```
 Expected Output
 ```
