@@ -32,7 +32,6 @@ Errors:
 "ErrorType": "description"
 }
 
-Possible errors -> username validation, duplicate username, and creation
 ```
 
 ### Account Login
