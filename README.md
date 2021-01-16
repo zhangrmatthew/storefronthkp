@@ -238,7 +238,7 @@ Raw JSON
 "quantity" increments amount of an item (or decrements if input is negative), 
 once item's total quantity in cart is <= 0 it gets removed
 
-"removeItem", true to remove the entire item regardless of quantity, false to 
+"removeItem", sest as true to remove the entire item regardless of quantity, set as false to 
 not do so
 
 ```
