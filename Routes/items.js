@@ -18,7 +18,7 @@ router.put('/upload', authenticateTokenAdmin, upload.array('photos', 10), functi
   })
 
   const newItem = new itemModel({name: req.body.name, price: req.body.price, description: req.body.description
-  , catagory: req.body.catagory, photos: uploadedPics});
+  , category: req.body.category, photos: uploadedPics});
 
   itemModel.exists({name: req.body.name},
     function(err, result){
@@ -29,7 +29,7 @@ router.put('/upload', authenticateTokenAdmin, upload.array('photos', 10), functi
         if (result){
           itemModel.findOneAndUpdate({name: req.body.name},
           {$set: {price: req.body.price, description: req.body.description
-          , catagory: req.body.catagory, photos: uploadedPics} }, {new: true},
+          , category: req.body.category, photos: uploadedPics} }, {new: true},
           function(err,result){
             if (err){
               res.send(JSON.stringify({ErrorType : "Updating"}));
