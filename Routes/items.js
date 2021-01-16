@@ -2,23 +2,37 @@ const jwt = require("jsonwebtoken");
 const express = require('express');
 const router = express.Router();
 const itemModel = require('../Models/itemsSchema');
+const multer  = require('multer');
+const upload = multer({ dest: 'Temp/' });
+const fs = require('fs');
+const path = require('path');
 require('dotenv/config');
 
-router.put('/create', authenticateToken, function(req, res){
-  const newItem = new itemModel({username: req.user.username, name: req.body.name
-    , quantity: req.body.quantity});
-  itemModel.exists({ username: req.user.username, name: req.body.name},
+router.put('/upload', authenticateTokenAdmin, upload.array('photos', 10), function (req, res, next) {
+// req.files is array of `photos` files
+// req.body will contain the text fields, if there were any
+
+  var uploadedPics = [];
+  req.files.forEach(function(file){
+      uploadedPics.push(file.filename);
+  })
+
+  const newItem = new itemModel({name: req.body.name, price: req.body.price, description: req.body.description
+  , catagory: req.body.catagory, photos: uploadedPics});
+
+  itemModel.exists({name: req.body.name},
     function(err, result){
       if(err){
-        res.send("ErrorType: Item Addition");
+        res.send(JSON.stringify({ErrorType : "Item Addition"}));
       }
       else{
         if (result){
-          itemModel.findOneAndUpdate({ username: req.user.username, name: req.body.name},
-          {$inc: {quantity: req.body.quantity} }, {new: true},
+          itemModel.findOneAndUpdate({name: req.body.name},
+          {$set: {price: req.body.price, description: req.body.description
+          , catagory: req.body.catagory, photos: uploadedPics} }, {new: true},
           function(err,result){
             if (err){
-              res.send("ErrorType: Updating");
+              res.send(JSON.stringify({ErrorType : "Updating"}));
             }else{
               res.send(JSON.stringify({result}));
             }
@@ -31,77 +45,121 @@ router.put('/create', authenticateToken, function(req, res){
             });
           }
           catch(err){
-            res.send("ErrorType: Add Item");
+            res.send(JSON.stringify({ErrorType : "Add Item"}));
           }
-        };
+        }
       }
   });
 });
 
-
-router.get('/get/:token', authenticateTokenURL, function(req, res){
-  var items = [];
-  itemModel.exists({ username: req.user.username},
+router.get('/get/category', authenticateTokenAdmin, function(req, res){
+  var itemsInCategory = [];
+  itemModel.exists({ category: req.body.category},
     function(err, result){
       if(err){
-        res.send("ErrorType: Cart Validation");
+        res.send(JSON.stringify({ErrorType : "Category Validation"}));
       }
       else{
         if (result){
-          itemModel.find({username: req.user.username}, function (err, docs) {
+          itemModel.find({category: req.body.category}, function (err, docs) {
             docs.forEach(function(doc){
-                items.push(doc.name);
+                itemsInCategory.push(doc);
             });
-            res.send(items);
+            //avoid cubic behavior within other for loop - try to get time comp down later
+            itemsInCategory.forEach(function(item) {
+              sanitizedPaths = [];
+              item.photos.forEach(function(relational){
+                newPath = path.join(__dirname, "..", "Temp", relational);
+                sanitizedPaths.push(newPath);
+              });
+              item.photos = sanitizedPaths;
+            });
+            res.send(JSON.stringify({itemsInCategory}));
           });
         }
         else{
-          res.send('ErrorType: Cart is Empty');
+          res.send(JSON.stringify({ErrorType: 'Cannot find all'}));
         }
       }
     });
 });
 
 
-router.delete('/remove', authenticateToken, function(req,res){
-  itemModel.findByIdAndDelete(req.body._id, function(err, removed){
+
+
+
+router.get('/get/all', authenticateTokenAdmin, function(req, res){
+  var allItems = [];
+  itemModel.exists({},
+    function(err, result){
+      if(err){
+        res.send(JSON.stringify({ErrorType : "All Validation"}));
+      }
+      else{
+        if (result){
+          itemModel.find({}, function (err, docs) {
+            docs.forEach(function(doc){
+                allItems.push(doc);
+            });
+            //avoid cubic behavior within other for loop - try to get time comp down later
+            allItems.forEach(function(item) {
+              sanitizedPaths = [];
+              console.log(item.photos);
+              item.photos.forEach(function(relational){
+                console.log(sanitizedPaths);
+                newPath = path.join(__dirname, "..", "Temp", relational);
+                console.log(newPath);
+                sanitizedPaths.push(newPath);
+              });
+              item.photos = sanitizedPaths;
+            });
+            res.send(JSON.stringify({allItems}));
+          });
+        }
+        else{
+          res.send(JSON.stringify({ErrorType: 'Cannot find all'}));
+        }
+      }
+    });
+});
+
+
+router.delete('/remove', authenticateTokenAdmin, function(req,res){
+  console.log(req.body);
+  itemModel.findById(req.body._id, function (err, item) {
     if(err){
-      res.send("ErrorType: Deletion");
+      res.send(JSON.stringify({ErrorType: "Finding During Deletion"}));
     }
     else{
-      console.log(removed);
-      res.send(removed);
+      console.log(item);
+      item.photos.forEach(function(filename){
+        fs.unlink(path.join(__dirname, "..", "Temp", filename.toString())
+       ,(err) => {
+          if (err) {
+              //does this avoid sending multiple res to server
+              res.send(JSON.stringify({ErrorType: "Unlinking Photos"}));
+              return;
+          }
+        });
+      });
     }
+  });
 
+  itemModel.findByIdAndDelete(req.body._id, function(err, removed){
+    if(err){
+      res.send(JSON.stringify({ErrorType: "Database Deletion"}));
+    }
+    else{
+      res.send(JSON.stringify({removed}));
+    }
   });
 });
 
-function authenticateToken(req, res, next) {
-  const token = req.body.token;
-  if (token == null) return res.sendStatus(401)
-  jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
-    console.log(err);
-    if (err) return res.sendStatus(403);
-    req.user = decoded;
-    next();
-  })
-}
 
-function authenticateTokenURL(req, res, next) {
-  const token = req.params.token;
-  console.log(token);
-  if (token == null) return res.sendStatus(401)
-  jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
-    console.log(err);
-    if (err) return res.sendStatus(403);
-    req.user = decoded;
-    next();
-  })
-}
 
 function authenticateTokenAdmin(req, res, next) {
-  const token = req.body.token;
-  console.log(token);
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
   if (token == null) return res.sendStatus(401)
   jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
     console.log(err);
@@ -109,6 +167,6 @@ function authenticateTokenAdmin(req, res, next) {
     req.user = decoded;
     if (!req.user.isAdmin) return res.send(403);
     next();
-  })
+  });
 }
 module.exports = router;
