@@ -26,7 +26,7 @@ router.post('/login', function(req, res){
                   if(result){
                     const token = generateAccessToken({username : req.body.username,
                     isAdmin: req.body.isAdmin});
-                    res.send(JSON.stringify({Message: 'Login Success', adminInfo : result.isAdmin, token}));
+                    res.send(JSON.stringify({Message: 'Login Success', adminInfo : acc.isAdmin, token}));
                   }
                   else{
                     res.send(JSON.stringify({ErrorType: "Invalid Password"}));
